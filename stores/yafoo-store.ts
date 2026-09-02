@@ -15,6 +15,9 @@ import type {
   Cart,
   CartLine,
   CustomizationSelection,
+  DestinationCart,
+  DestinationOrder,
+  MealPlanSubscription,
   MenuItem,
   Order,
   PickupPoint,
@@ -32,6 +35,18 @@ const emptyCart: Cart = {
   paymentMethod: "demo-upi",
 };
 
+export const emptyDestinationCart: DestinationCart = {
+  destinationId: null,
+  destinationLabel: "",
+  deliveryWindowId: null,
+  purchaseMode: "one-time",
+  mealId: null,
+  planId: null,
+  quantity: 1,
+  paymentMethod: "demo-upi",
+  specialInstructions: "",
+};
+
 interface StoredPreferences {
   route: Route | null;
 }
@@ -41,6 +56,9 @@ interface YafooState {
   recentRoutes: RecentRoute[];
   cart: Cart;
   orders: Order[];
+  destinationCart: DestinationCart;
+  destinationOrders: DestinationOrder[];
+  destinationPlans: MealPlanSubscription[];
   hasHydrated: boolean;
   hydrate: () => void;
   setRoute: (route: Route) => void;
@@ -60,6 +78,12 @@ interface YafooState {
   clearCart: () => void;
   addOrder: (order: Order) => void;
   advanceOrder: (orderId: string) => void;
+  setDestinationCart: (cart: DestinationCart) => void;
+  updateDestinationCart: (updates: Partial<DestinationCart>) => void;
+  clearDestinationCart: () => void;
+  addDestinationOrder: (order: DestinationOrder) => void;
+  advanceDestinationOrder: (orderId: string) => void;
+  addDestinationPlan: (plan: MealPlanSubscription) => void;
   resetDemo: () => void;
 }
 
@@ -79,6 +103,18 @@ function saveOrders(orders: Order[]): void {
   writeStoredValue(persistenceKeys.orders, orders);
 }
 
+function saveDestinationCart(cart: DestinationCart): void {
+  writeStoredValue(persistenceKeys.destinationCart, cart);
+}
+
+function saveDestinationOrders(orders: DestinationOrder[]): void {
+  writeStoredValue(persistenceKeys.destinationOrders, orders);
+}
+
+function saveDestinationPlans(plans: MealPlanSubscription[]): void {
+  writeStoredValue(persistenceKeys.destinationPlans, plans);
+}
+
 function safeCart(value: Cart): Cart {
   if (!value || !Array.isArray(value.lines)) return emptyCart;
   return { ...emptyCart, ...value, lines: value.lines };
@@ -92,11 +128,31 @@ function safeOrders(value: Order[]): Order[] {
   return Array.isArray(value) ? value : [];
 }
 
+function safeDestinationCart(value: DestinationCart): DestinationCart {
+  if (!value || typeof value !== "object") return emptyDestinationCart;
+  return {
+    ...emptyDestinationCart,
+    ...value,
+    quantity: Math.max(1, Math.min(9, Math.floor(value.quantity || 1))),
+  };
+}
+
+function safeDestinationOrders(value: DestinationOrder[]): DestinationOrder[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeDestinationPlans(value: MealPlanSubscription[]): MealPlanSubscription[] {
+  return Array.isArray(value) ? value : [];
+}
+
 export const useYafooStore = create<YafooState>((set) => ({
   route: null,
   recentRoutes: [],
   cart: emptyCart,
   orders: [],
+  destinationCart: emptyDestinationCart,
+  destinationOrders: [],
+  destinationPlans: [],
   hasHydrated: false,
 
   hydrate: () => {
@@ -109,12 +165,27 @@ export const useYafooStore = create<YafooState>((set) => ({
     );
     const cart = safeCart(readStoredValue<Cart>(persistenceKeys.cart, emptyCart));
     const orders = safeOrders(readStoredValue<Order[]>(persistenceKeys.orders, []));
+    const destinationCart = safeDestinationCart(
+      readStoredValue<DestinationCart>(
+        persistenceKeys.destinationCart,
+        emptyDestinationCart,
+      ),
+    );
+    const destinationOrders = safeDestinationOrders(
+      readStoredValue<DestinationOrder[]>(persistenceKeys.destinationOrders, []),
+    );
+    const destinationPlans = safeDestinationPlans(
+      readStoredValue<MealPlanSubscription[]>(persistenceKeys.destinationPlans, []),
+    );
 
     set({
       route: preferences.route ?? null,
       recentRoutes,
       cart,
       orders,
+      destinationCart,
+      destinationOrders,
+      destinationPlans,
       hasHydrated: true,
     });
   },
@@ -243,9 +314,70 @@ export const useYafooStore = create<YafooState>((set) => ({
     });
   },
 
+  setDestinationCart: (destinationCart) => {
+    saveDestinationCart(destinationCart);
+    set({ destinationCart });
+  },
+
+  updateDestinationCart: (updates) => {
+    set((state) => {
+      const destinationCart = { ...state.destinationCart, ...updates };
+      saveDestinationCart(destinationCart);
+      return { destinationCart };
+    });
+  },
+
+  clearDestinationCart: () => {
+    saveDestinationCart(emptyDestinationCart);
+    set({ destinationCart: emptyDestinationCart });
+  },
+
+  addDestinationOrder: (order) => {
+    set((state) => {
+      const destinationOrders = [order, ...state.destinationOrders];
+      saveDestinationOrders(destinationOrders);
+      return { destinationOrders };
+    });
+  },
+
+  advanceDestinationOrder: (orderId) => {
+    const sequence: DestinationOrder["status"][] = [
+      "confirmed",
+      "preparing",
+      "out-for-delivery",
+      "delivered",
+    ];
+
+    set((state) => {
+      const destinationOrders = state.destinationOrders.map((order) => {
+        if (order.id !== orderId) return order;
+        const nextStatus = sequence[sequence.indexOf(order.status) + 1];
+        return nextStatus ? { ...order, status: nextStatus } : order;
+      });
+      saveDestinationOrders(destinationOrders);
+      return { destinationOrders };
+    });
+  },
+
+  addDestinationPlan: (plan) => {
+    set((state) => {
+      const destinationPlans = [plan, ...state.destinationPlans];
+      saveDestinationPlans(destinationPlans);
+      return { destinationPlans };
+    });
+  },
+
   resetDemo: () => {
     clearYafooStorage();
-    set({ route: null, recentRoutes: [], cart: emptyCart, orders: [] });
+    set({
+      route: null,
+      recentRoutes: [],
+      cart: emptyCart,
+      orders: [],
+      destinationCart: emptyDestinationCart,
+      destinationOrders: [],
+      destinationPlans: [],
+    });
   },
 }));
 

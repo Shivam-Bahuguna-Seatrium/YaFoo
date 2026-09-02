@@ -2,6 +2,22 @@ export type CommuteMode = "transit" | "car" | "walk";
 
 export type PickupTimeMode = "leave-now" | "scheduled";
 
+export type OrderingMode = "on-the-way" | "at-destination";
+
+export type DestinationType = "office" | "home" | "other";
+
+export type DestinationPurchaseMode = "one-time" | "plan";
+
+export type MealPeriod = "breakfast" | "lunch" | "dinner";
+
+export type DestinationOrderStatus =
+  | "confirmed"
+  | "preparing"
+  | "out-for-delivery"
+  | "delivered";
+
+export type SubscriptionStatus = "active" | "paused" | "completed";
+
 export type LocationKind = "place" | "transit-hub";
 
 export type DietaryTag =
@@ -37,6 +53,117 @@ export type OrderStatus = "confirmed" | "preparing" | "ready" | "collected";
 export interface MapPosition {
   x: number;
   y: number;
+}
+
+export interface Destination {
+  id: string;
+  type: DestinationType;
+  name: string;
+  area: string;
+  addressHint: string;
+  isPrimaryOffice: boolean;
+}
+
+export interface DeliveryWindow {
+  id: string;
+  dayLabel: string;
+  date: string;
+  label: string;
+  mealPeriod: MealPeriod;
+  isAvailable: boolean;
+}
+
+export interface DestinationMeal {
+  id: string;
+  name: string;
+  providerName: string;
+  description: string;
+  imageUrl: string;
+  dietaryTags: DietaryTag[];
+  servingLabel: string;
+  price: number;
+  deliveryMinutes: number;
+  availableDestinationIds: string[];
+  availableWindowIds: string[];
+  isPopular: boolean;
+  isAvailable: boolean;
+  promotion: string | null;
+}
+
+export interface MealPlan {
+  id: string;
+  name: string;
+  providerName: string;
+  mealStyle: string;
+  dietaryTags: DietaryTag[];
+  mealsPerDelivery: number;
+  deliveryDays: string[];
+  cadenceLabel: string;
+  durationWeeks: number;
+  pricePerDelivery: number;
+  planPrice: number;
+  firstDeliveryWindowId: string;
+  availableDestinationIds: string[];
+  isAvailable: boolean;
+  promotion: string | null;
+}
+
+export interface DestinationCart {
+  destinationId: string | null;
+  destinationLabel: string;
+  deliveryWindowId: string | null;
+  purchaseMode: DestinationPurchaseMode;
+  mealId: string | null;
+  planId: string | null;
+  quantity: number;
+  paymentMethod: "demo-card" | "demo-upi";
+  specialInstructions: string;
+}
+
+export interface DestinationTotals {
+  subtotal: number;
+  deliveryFee: number;
+  taxes: number;
+  discount: number;
+  total: number;
+}
+
+export interface PlanTotals {
+  planPrice: number;
+  discount: number;
+  total: number;
+}
+
+export interface DestinationOrder {
+  id: string;
+  orderNumber: string;
+  orderType: "destination-meal";
+  destination: Destination;
+  destinationLabel: string;
+  deliveryWindow: DeliveryWindow;
+  meal: DestinationMeal;
+  quantity: number;
+  subtotal: number;
+  deliveryFee: number;
+  taxes: number;
+  discount: number;
+  total: number;
+  paymentMethod: DestinationCart["paymentMethod"];
+  status: DestinationOrderStatus;
+  createdAt: string;
+}
+
+export interface MealPlanSubscription {
+  id: string;
+  subscriptionNumber: string;
+  orderType: "destination-plan";
+  destination: Destination;
+  destinationLabel: string;
+  plan: MealPlan;
+  firstDeliveryWindow: DeliveryWindow;
+  status: SubscriptionStatus;
+  billingLabel: string;
+  createdAt: string;
 }
 
 export interface Location {

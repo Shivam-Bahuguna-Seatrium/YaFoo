@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { OrdersPageClient } from "@/components/orders/orders-page-client";
 
 export const metadata: Metadata = {
-  title: "Pickup history",
-  description: "Review your simulated YaFoo pickup orders.",
+  title: "Orders and plans",
+  description: "Review your simulated YaFoo meals, pickups, and tiffin plans.",
 };
 
 export default function OrdersPage() {

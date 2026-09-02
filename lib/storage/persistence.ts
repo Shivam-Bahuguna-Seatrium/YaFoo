@@ -3,6 +3,9 @@ export const persistenceKeys = {
   recentRoutes: "yafoo:recent-routes:v1",
   orders: "yafoo:orders:v1",
   preferences: "yafoo:preferences:v1",
+  destinationCart: "yafoo:destination-cart:v2",
+  destinationOrders: "yafoo:destination-orders:v1",
+  destinationPlans: "yafoo:destination-plans:v1",
 } as const;
 
 export function readStoredValue<T>(key: string, fallback: T): T {

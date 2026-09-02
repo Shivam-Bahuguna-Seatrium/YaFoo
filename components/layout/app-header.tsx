@@ -6,6 +6,7 @@ import { Bell, ChevronDown, RotateCcw, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { InstallAppButton } from "@/components/layout/install-app-button";
 import { cn } from "@/lib/utils/cn";
 import { useYafooStore } from "@/stores/yafoo-store";
 
@@ -66,6 +67,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallAppButton />
           <Button
             variant="ghost"
             size="icon"

@@ -22,16 +22,39 @@ import {
   restaurantById,
   restaurants,
 } from "@/lib/mock-data/restaurants";
+import {
+  destinationById,
+  destinations,
+  getDestinationById,
+} from "@/lib/mock-data/destinations";
+import {
+  deliveryWindowById,
+  deliveryWindows,
+} from "@/lib/mock-data/delivery-windows";
+import {
+  destinationMealById,
+  destinationMeals,
+} from "@/lib/mock-data/destination-meals";
+import { mealPlanById, mealPlans } from "@/lib/mock-data/meal-plans";
 
 export {
   categoryById,
   configureRoute,
   customizationGroupById,
   customizationGroups,
+  destinationById,
+  destinationMealById,
+  destinationMeals,
+  destinations,
+  deliveryWindowById,
+  deliveryWindows,
   getBaseRoute,
+  getDestinationById,
   getLocationById,
   locationById,
   locations,
+  mealPlanById,
+  mealPlans,
   menuCategories,
   menuItems,
   pickupPointById,

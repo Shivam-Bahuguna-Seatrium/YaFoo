@@ -26,6 +26,14 @@ such in the product.
    only demo control.
 10. Refresh the browser to restore valid cart, recent-route, and order state, or choose Reset Demo.
 
+## Destination Meals and Tiffin Plans
+
+The home screen also supports an **At Destination** mode for simulated delivery to an office,
+home, or another labelled place. Choose a one-time meal for a selected delivery window, or
+review a recurring dabba/tiffin plan with weekday cadence, first delivery, duration, and
+simulated billing language. The original **On the Way** route-pickup journey remains available
+as a separate order context.
+
 ## Technology
 
 - Next.js 16 App Router and React 19

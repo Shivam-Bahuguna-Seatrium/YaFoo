@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { ArrowRight, Check, Clock3, Leaf, Route as RouteIcon, Sparkles } from "lucide-react";
+import { useState } from "react";
 
+import { DestinationSearchForm } from "@/components/destination/destination-search-form";
+import { WorkplaceContext } from "@/components/destination/workplace-context";
+import { OrderingModeSwitch } from "@/components/home/ordering-mode-switch";
 import { LocationSearchForm } from "@/components/route/location-search-form";
 import { ImageFallback } from "@/components/shared/image-fallback";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -12,10 +16,12 @@ import { Card } from "@/components/ui/card";
 import { restaurants } from "@/lib/mock-data";
 import { formatInr } from "@/lib/utils/currency";
 import { useYafooStore } from "@/stores/yafoo-store";
+import type { OrderingMode } from "@/types/domain";
 
 const defaultRouteHref = "/route-results?origin=powai&destination=kandivali-west&mode=transit&time=leave-now";
 
 export function HomePageClient() {
+  const [orderingMode, setOrderingMode] = useState<OrderingMode>("on-the-way");
   const hasHydrated = useYafooStore((state) => state.hasHydrated);
   const latestOrder = useYafooStore((state) => state.orders[0]);
 
@@ -43,10 +49,11 @@ export function HomePageClient() {
 
           <div className="relative rounded-[1.75rem] bg-[var(--surface)] p-4 text-[var(--ink)] shadow-[0_26px_80px_rgba(0,0,0,0.28)] sm:p-6">
             <div className="mb-4 flex items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-[var(--ink-soft)]"><RouteIcon className="size-4 text-[var(--orange)]" /> Pickup mode</div>
+              <div className="flex items-center gap-2 text-xs font-bold text-[var(--ink-soft)]"><RouteIcon className="size-4 text-[var(--orange)]" /> Order mode</div>
               <Badge tone="green"><span className="size-1.5 rounded-full bg-[var(--green)]" /> Active</Badge>
             </div>
-            <LocationSearchForm />
+            <OrderingModeSwitch value={orderingMode} onChange={setOrderingMode} />
+            {orderingMode === "on-the-way" ? <LocationSearchForm /> : <div className="space-y-5"><WorkplaceContext /><DestinationSearchForm /></div>}
           </div>
         </div>
       </section>
